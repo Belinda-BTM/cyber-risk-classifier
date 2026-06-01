@@ -1,6 +1,6 @@
 # CyberRisk AI — SMB Vulnerability Scanner ROI Classifier
 
-An AI-powered cyber risk classification web application built as a proof-of-concept for an academic thesis. It assesses the cybersecurity risk level of small to medium businesses and recommends whether investing in a cloud vulnerability scanner provides ROI.
+An AI-powered cyber risk classification web application built as a proof-of-concept for an academic engineering project. It assesses the cybersecurity risk level of small to medium businesses and recommends whether investing in a cloud vulnerability scanner provides ROI.
 
 ## Features
 
@@ -22,4 +22,4 @@ Open `index.html` in a browser. Enter your Anthropic API key when prompted to un
 
 ## Academic Context
 
-This project supplements a theoretical thesis on AI-assisted cyber risk decision support for SMBs. The scoring model serves as a practical implementation of multi-factor weighted classification analogous to logistic regression or decision tree models.
+This project supplements a theoretical thesis on AI-assisted cyber risk decision support for SMEs. The scoring model serves as a practical implementation of multi-factor weighted classification analogous to logistic regression or decision tree models.
