@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CyberRisk AI — SMB Vulnerability Scanner ROI Classifier</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <div class="scan-line"></div>
+  <div class="grid-overlay"></div>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <div class="logo-icon">
+          <span class="logo-bracket">[</span>
+          <span class="logo-symbol">⬡</span>
+          <span class="logo-bracket">]</span>
+        </div>
+        <span class="logo-text">CYBER<span class="logo-accent">RISK</span><span class="logo-ai">_AI</span></span>
+      </div>
+      <div class="nav-meta">
+        <span class="nav-tag"><span class="tag-dot"></span>SYSTEM ONLINE</span>
+        <span class="nav-tag">v2.0</span>
+        <span class="nav-tag">SMB EDITION</span>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-particles" id="particles"></div>
+    <div class="container">
+      <div class="hero-terminal">
+        <div class="terminal-bar">
+          <span class="t-dot red"></span>
+          <span class="t-dot yellow"></span>
+          <span class="t-dot green"></span>
+          <span class="t-title">threat_assessment.exe</span>
+        </div>
+        <div class="terminal-body">
+          <p class="t-line"><span class="t-prompt">$</span> initializing cyber risk engine<span class="t-cursor">_</span></p>
+          <p class="t-line dim"><span class="t-prompt">></span> loading SMB vulnerability database...</p>
+          <p class="t-line dim"><span class="t-prompt">></span> AI classifier ready</p>
+          <p class="t-line success"><span class="t-prompt">></span> STATUS: OPERATIONAL</p>
+        </div>
+      </div>
+      <div class="hero-content">
+        <div class="hero-eyebrow">AI-POWERED THREAT INTELLIGENCE</div>
+        <h1 class="hero-title">Is your business a <span class="highlight">target?</span></h1>
+        <p class="hero-sub">Answer 12 questions. Our AI engine analyses your attack surface, calculates your risk exposure, and tells you whether a vulnerability scanner is worth the investment.</p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="stat-val">12</span>
+            <span class="stat-label">Risk Vectors</span>
+          </div>
+          <div class="stat-div"></div>
+          <div class="hero-stat">
+            <span class="stat-val">5</span>
+            <span class="stat-label">Dimensions</span>
+          </div>
+          <div class="stat-div"></div>
+          <div class="hero-stat">
+            <span class="stat-val">AI</span>
+            <span class="stat-label">Powered</span>
+          </div>
+        </div>
+        <a href="#assessment" class="cta-btn">
+          <span class="cta-text">BEGIN THREAT ASSESSMENT</span>
+          <span class="cta-arrow">▶</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="method-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">// HOW IT WORKS</div>
+        <h2>Threat Classification Engine</h2>
+      </div>
+      <div class="method-grid">
+        <div class="method-card">
+          <div class="method-num">01</div>
+          <div class="method-icon">◈</div>
+          <h3>Input Collection</h3>
+          <p>Answer questions across 5 risk dimensions: infrastructure, data sensitivity, compliance posture, incident history, and operational exposure.</p>
+        </div>
+        <div class="method-card">
+          <div class="method-num">02</div>
+          <div class="method-icon">◉</div>
+          <h3>Risk Scoring</h3>
+          <p>A weighted multi-factor algorithm scores each dimension and computes an aggregate risk index from 0–100, analogous to a trained ML classifier.</p>
+        </div>
+        <div class="method-card">
+          <div class="method-num">03</div>
+          <div class="method-icon">◎</div>
+          <h3>AI Analysis</h3>
+          <p>Claude AI generates a bespoke threat narrative, highlights your top vulnerabilities, and produces prioritised remediation steps.</p>
+        </div>
+        <div class="method-card">
+          <div class="method-num">04</div>
+          <div class="method-icon">◆</div>
+          <h3>ROI Verdict</h3>
+          <p>The engine cross-references your risk profile against scanner ROI models to deliver a clear investment recommendation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="assessment-section" id="assessment">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">// RISK ASSESSMENT MODULE</div>
+        <h2>Threat Surface Analysis</h2>
+        <p>Complete all sections for maximum accuracy. Fields marked with <span class="req">*</span> are required.</p>
+      </div>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-steps">
+          <div class="ps active" id="ps1">
+            <div class="ps-num">1</div>
+            <div class="ps-label">Organisation</div>
+          </div>
+          <div class="ps-line" id="pl1"></div>
+          <div class="ps" id="ps2">
+            <div class="ps-num">2</div>
+            <div class="ps-label">Infrastructure</div>
+          </div>
+          <div class="ps-line" id="pl2"></div>
+          <div class="ps" id="ps3">
+            <div class="ps-num">3</div>
+            <div class="ps-label">Security Posture</div>
+          </div>
+          <div class="ps-line" id="pl3"></div>
+          <div class="ps" id="ps4">
+            <div class="ps-num">4</div>
+            <div class="ps-label">Results</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-panel" id="step1">
+        <div class="panel-header">
+          <span class="panel-tag">SECTION 01</span>
+          <h3>Organisation Profile</h3>
+        </div>
+        <div class="form-grid">
+          <div class="form-group span2">
+            <label>Industry sector <span class="req">*</span></label>
+            <div class="chip-grid" id="q-industry" data-mode="single">
+              <div class="chip" data-v="3">Finance / Banking</div>
+              <div class="chip" data-v="3">Healthcare</div>
+              <div class="chip" data-v="2">Legal / Professional</div>
+              <div class="chip" data-v="2">Retail / E-commerce</div>
+              <div class="chip" data-v="2">Education</div>
+              <div class="chip" data-v="1">Manufacturing</div>
+              <div class="chip" data-v="1">Hospitality</div>
+              <div class="chip" data-v="1">Other</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Number of employees <span class="req">*</span></label>
+            <div class="slider-wrap">
+              <input type="range" id="q-emp" min="1" max="250" value="25" />
+              <div class="slider-val"><span id="emp-display">25</span> employees</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Annual revenue (USD)</label>
+            <div class="chip-grid" id="q-revenue" data-mode="single">
+              <div class="chip" data-v="1">&lt; $500K</div>
+              <div class="chip" data-v="2">$500K – $2M</div>
+              <div class="chip" data-v="2">$2M – $10M</div>
+              <div class="chip" data-v="3">&gt; $10M</div>
+            </div>
+          </div>
+          <div class="form-group span2">
+            <label>Data types handled <span class="req">*</span></label>
+            <div class="chip-grid" id="q-data" data-mode="multi">
+              <div class="chip" data-v="3">Customer PII</div>
+              <div class="chip" data-v="3">Payment / Financial</div>
+              <div class="chip" data-v="3">Health Records</div>
+              <div class="chip" data-v="2">Intellectual Property</div>
+              <div class="chip" data-v="2">Employee Records</div>
+              <div class="chip" data-v="1">Operational Data</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer">
+          <button class="btn-next" onclick="goStep(2)">NEXT: INFRASTRUCTURE <span>▶</span></button>
+        </div>
+      </div>
+
+      <div class="form-panel hidden" id="step2">
+        <div class="panel-header">
+          <span class="panel-tag">SECTION 02</span>
+          <h3>Infrastructure & Exposure</h3>
+        </div>
+        <div class="form-grid">
+          <div class="form-group span2">
+            <label>Cloud services in use <span class="req">*</span></label>
+            <div class="chip-grid" id="q-cloud" data-mode="multi">
+              <div class="chip" data-v="2">AWS</div>
+              <div class="chip" data-v="2">Azure</div>
+              <div class="chip" data-v="2">Google Cloud</div>
+              <div class="chip" data-v="1">Microsoft 365</div>
+              <div class="chip" data-v="1">Google Workspace</div>
+              <div class="chip" data-v="2">Custom / Private Cloud</div>
+              <div class="chip" data-v="0">No Cloud Services</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Number of internet-facing assets</label>
+            <div class="slider-wrap">
+              <input type="range" id="q-assets" min="0" max="50" value="5" />
+              <div class="slider-val"><span id="assets-display">5</span> assets</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Remote work policy <span class="req">*</span></label>
+            <div class="chip-grid" id="q-remote" data-mode="single">
+              <div class="chip" data-v="1">On-site only</div>
+              <div class="chip" data-v="2">Hybrid</div>
+              <div class="chip" data-v="3">Fully remote</div>
+            </div>
+          </div>
+          <div class="form-group span2">
+            <label>Third-party integrations / vendors</label>
+            <div class="chip-grid" id="q-vendors" data-mode="single">
+              <div class="chip" data-v="0">None</div>
+              <div class="chip" data-v="1">1 – 3</div>
+              <div class="chip" data-v="2">4 – 10</div>
+              <div class="chip" data-v="3">10+</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer">
+          <button class="btn-back" onclick="goStep(1)">◀ BACK</button>
+          <button class="btn-next" onclick="goStep(3)">NEXT: SECURITY POSTURE <span>▶</span></button>
+        </div>
+      </div>
+
+      <div class="form-panel hidden" id="step3">
+        <div class="panel-header">
+          <span class="panel-tag">SECTION 03</span>
+          <h3>Security Posture & History</h3>
+        </div>
+        <div class="form-grid">
+          <div class="form-group span2">
+            <label>Security controls in place <span class="req">*</span></label>
+            <div class="chip-grid" id="q-controls" data-mode="multi">
+              <div class="chip" data-v="-2">Firewall / IDS</div>
+              <div class="chip" data-v="-2">Multi-Factor Authentication</div>
+              <div class="chip" data-v="-2">Endpoint Protection</div>
+              <div class="chip" data-v="-1">Security Awareness Training</div>
+              <div class="chip" data-v="-1">Data Encryption</div>
+              <div class="chip" data-v="-2">Regular Backups</div>
+              <div class="chip" data-v="-1">Patch Management</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Last vulnerability scan / pentest <span class="req">*</span></label>
+            <div class="chip-grid" id="q-scan" data-mode="single">
+              <div class="chip" data-v="0">Within 3 months</div>
+              <div class="chip" data-v="1">3 – 12 months ago</div>
+              <div class="chip" data-v="2">Over a year ago</div>
+              <div class="chip" data-v="3">Never</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Compliance requirements</label>
+            <div class="chip-grid" id="q-compliance" data-mode="multi">
+              <div class="chip" data-v="2">GDPR</div>
+              <div class="chip" data-v="2">PCI-DSS</div>
+              <div class="chip" data-v="2">HIPAA</div>
+              <div class="chip" data-v="1">ISO 27001</div>
+              <div class="chip" data-v="1">SOC 2</div>
+              <div class="chip" data-v="0">None</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Previous security incidents <span class="req">*</span></label>
+            <div class="chip-grid" id="q-incidents" data-mode="single">
+              <div class="chip" data-v="0">None</div>
+              <div class="chip" data-v="2">1 – 2 minor</div>
+              <div class="chip" data-v="3">Major breach / ransomware</div>
+              <div class="chip" data-v="1">Unknown / unsure</div>
+            </div>
+          </div>
+          <div class="form-group span2">
+            <label>Dedicated IT / security staff</label>
+            <div class="chip-grid" id="q-staff" data-mode="single">
+              <div class="chip" data-v="3">None — no IT staff</div>
+              <div class="chip" data-v="2">General IT only</div>
+              <div class="chip" data-v="1">IT with some security knowledge</div>
+              <div class="chip" data-v="0">Dedicated security team</div>
+            </div>
+          </div>
+        </div>
+        <div class="panel-footer">
+          <button class="btn-back" onclick="goStep(2)">◀ BACK</button>
+          <button class="btn-analyze" onclick="runAnalysis()">
+            <span class="btn-analyze-text">RUN THREAT ANALYSIS</span>
+            <span class="btn-analyze-icon">⬡</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-panel hidden" id="step4">
+        <div id="results-container"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-logo">
+          <span class="logo-bracket">[</span><span class="logo-symbol">⬡</span><span class="logo-bracket">]</span>
+          <span>CYBERRISK_AI</span>
+        </div>
+        <p class="footer-note">Proof-of-concept for academic research. Not a substitute for professional cybersecurity assessment.</p>
+        <p class="footer-copy">© 2026 CyberRisk AI</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
