@@ -4,11 +4,197 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CyberRisk AI — SMB Vulnerability Scanner ROI Classifier</title>
-  <link rel="stylesheet" href="style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg-primary: #040d14; --bg-secondary: #071520; --bg-panel: #0a1c2e; --bg-card: #0d2035;
+  --accent-cyan: #00e5ff; --accent-green: #00ff9d; --accent-red: #ff3d57; --accent-yellow: #ffd600;
+  --text-primary: #e0f4ff; --text-secondary: #7aaccc; --text-dim: #3d6b8a;
+  --border: rgba(0,229,255,0.12); --border-bright: rgba(0,229,255,0.35);
+  --font-mono: 'Share Tech Mono', monospace; --font-display: 'Rajdhani', sans-serif; --font-body: 'Exo 2', sans-serif;
+  --glow-cyan: 0 0 20px rgba(0,229,255,0.3); --glow-green: 0 0 20px rgba(0,255,157,0.3);
+}
+html { scroll-behavior: smooth; }
+body { background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-body); overflow-x: hidden; position: relative; }
+.scan-line { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg,transparent,var(--accent-cyan),transparent); animation: scanDown 8s linear infinite; z-index: 1000; pointer-events: none; opacity: 0.6; }
+@keyframes scanDown { 0%{top:0;opacity:.8} 100%{top:100vh;opacity:0} }
+.grid-overlay { position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.03) 1px,transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; position: relative; z-index: 1; }
+.navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(4,13,20,.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+.nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+.nav-logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { font-size: 18px; color: var(--accent-cyan); }
+.logo-bracket { color: var(--accent-cyan); opacity: .7; }
+.logo-symbol { color: var(--accent-cyan); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+.logo-text { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: 2px; color: var(--text-primary); }
+.logo-accent { color: var(--accent-cyan); }
+.logo-ai { color: var(--accent-green); font-size: 16px; }
+.nav-meta { display: flex; gap: 12px; align-items: center; }
+.nav-tag { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); border: 1px solid var(--border); padding: 3px 8px; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
+.tag-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent-green); animation: blink 1.5s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero { min-height: 100vh; display: flex; align-items: center; padding: 80px 0 60px; position: relative; overflow: hidden; }
+.hero-particles { position: absolute; inset: 0; overflow: hidden; }
+.particle { position: absolute; width: 2px; height: 2px; background: var(--accent-cyan); border-radius: 50%; animation: float linear infinite; opacity: .4; }
+@keyframes float { 0%{transform:translateY(100vh) translateX(0);opacity:0} 10%{opacity:.4} 90%{opacity:.4} 100%{transform:translateY(-100px) translateX(30px);opacity:0} }
+.hero .container { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+.hero-terminal { background: #030b12; border: 1px solid var(--border-bright); box-shadow: var(--glow-cyan),inset 0 0 40px rgba(0,229,255,.03); font-family: var(--font-mono); order: 2; }
+.terminal-bar { background: #071520; padding: 10px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+.t-dot { width: 10px; height: 10px; border-radius: 50%; }
+.t-dot.red{background:var(--accent-red)} .t-dot.yellow{background:var(--accent-yellow)} .t-dot.green{background:var(--accent-green)}
+.t-title { font-size: 11px; color: var(--text-dim); margin-left: 6px; letter-spacing: 1px; }
+.terminal-body { padding: 20px; }
+.t-line { font-size: 13px; color: var(--accent-cyan); margin-bottom: 10px; line-height: 1.5; }
+.t-line.dim { color: var(--text-dim); }
+.t-line.success { color: var(--accent-green); }
+.t-prompt { color: var(--accent-green); margin-right: 8px; }
+.t-cursor { animation: blink 1s step-end infinite; }
+.hero-eyebrow { font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan); letter-spacing: 3px; margin-bottom: 16px; opacity: .8; }
+.hero-title { font-family: var(--font-display); font-size: clamp(2.2rem,4vw,3.2rem); font-weight: 700; line-height: 1.1; letter-spacing: 1px; color: var(--text-primary); margin-bottom: 20px; }
+.highlight { color: var(--accent-cyan); text-shadow: var(--glow-cyan); }
+.hero-sub { font-size: 15px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 32px; max-width: 440px; }
+.hero-stats { display: flex; gap: 24px; align-items: center; margin-bottom: 36px; }
+.hero-stat { display: flex; flex-direction: column; gap: 4px; }
+.stat-val { font-family: var(--font-display); font-size: 26px; font-weight: 700; color: var(--accent-cyan); line-height: 1; }
+.stat-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+.stat-div { width: 1px; height: 30px; background: var(--border-bright); }
+.cta-btn { display: inline-flex; align-items: center; gap: 12px; background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); font-family: var(--font-display); font-size: 14px; font-weight: 600; letter-spacing: 2px; padding: 14px 28px; text-decoration: none; cursor: pointer; position: relative; overflow: hidden; transition: all .3s; }
+.cta-btn::before { content:''; position:absolute; inset:0; background:var(--accent-cyan); transform:scaleX(0); transform-origin:left; transition:transform .3s ease; z-index:0; }
+.cta-btn:hover::before { transform:scaleX(1); }
+.cta-btn:hover { color: var(--bg-primary); box-shadow: var(--glow-cyan); }
+.cta-text,.cta-arrow { position:relative; z-index:1; }
+.method-section { padding: 80px 0; border-top: 1px solid var(--border); position: relative; z-index: 1; }
+.section-header { margin-bottom: 48px; }
+.section-label { font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan); letter-spacing: 3px; margin-bottom: 10px; opacity: .8; }
+.section-header h2 { font-family: var(--font-display); font-size: clamp(1.6rem,3vw,2.2rem); font-weight: 600; letter-spacing: 1px; color: var(--text-primary); }
+.section-header p { margin-top: 10px; color: var(--text-secondary); font-size: 14px; }
+.req { color: var(--accent-red); }
+.method-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); }
+.method-card { background: var(--bg-secondary); padding: 32px 24px; transition: background .3s; }
+.method-card:hover { background: var(--bg-panel); }
+.method-num { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 16px; }
+.method-icon { font-size: 22px; color: var(--accent-cyan); margin-bottom: 14px; display: block; }
+.method-card h3 { font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: 1px; color: var(--text-primary); margin-bottom: 10px; }
+.method-card p { font-size: 13px; color: var(--text-secondary); line-height: 1.65; }
+.assessment-section { padding: 80px 0; border-top: 1px solid var(--border); position: relative; z-index: 1; }
+.progress-bar-wrap { margin-bottom: 40px; }
+.progress-steps { display: flex; align-items: center; }
+.ps { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); letter-spacing: 1px; flex-shrink: 0; }
+.ps-num { width: 28px; height: 28px; border: 1px solid var(--text-dim); display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all .3s; }
+.ps.active .ps-num { border-color: var(--accent-cyan); color: var(--accent-cyan); box-shadow: var(--glow-cyan); }
+.ps.active .ps-label { color: var(--accent-cyan); }
+.ps.done .ps-num { background: var(--accent-green); border-color: var(--accent-green); color: var(--bg-primary); }
+.ps.done .ps-label { color: var(--accent-green); }
+.ps-line { flex: 1; height: 1px; background: var(--border); margin: 0 12px; transition: background .3s; }
+.ps-line.done { background: var(--accent-green); }
+.form-panel { background: var(--bg-panel); border: 1px solid var(--border); position: relative; overflow: hidden; }
+.form-panel::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--accent-cyan),var(--accent-green),var(--accent-cyan)); background-size:200% 100%; animation:shimmer 3s linear infinite; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.panel-header { padding: 24px 32px; border-bottom: 1px solid var(--border); background: var(--bg-secondary); }
+.panel-tag { font-family: var(--font-mono); font-size: 10px; color: var(--accent-cyan); letter-spacing: 3px; display: block; margin-bottom: 6px; }
+.panel-header h3 { font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: 1px; color: var(--text-primary); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; padding: 32px; }
+.form-group { display: flex; flex-direction: column; gap: 12px; }
+.form-group.span2 { grid-column: span 2; }
+.form-group label { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); letter-spacing: 1.5px; text-transform: uppercase; }
+.chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); border: 1px solid var(--border); padding: 8px 14px; cursor: pointer; transition: all .2s; letter-spacing: .5px; background: var(--bg-secondary); }
+.chip:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+.chip.selected { border-color: var(--accent-cyan); color: var(--bg-primary); background: var(--accent-cyan); box-shadow: var(--glow-cyan); }
+.slider-wrap { display: flex; flex-direction: column; gap: 10px; }
+input[type="range"] { -webkit-appearance:none; width:100%; height:2px; background:var(--border-bright); outline:none; cursor:pointer; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; background:var(--accent-cyan); cursor:pointer; box-shadow:var(--glow-cyan); transform:rotate(45deg); }
+.slider-val { font-family: var(--font-mono); font-size: 12px; color: var(--accent-cyan); letter-spacing: 1px; }
+.panel-footer { padding: 20px 32px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background: var(--bg-secondary); }
+.btn-next,.btn-back,.btn-analyze { font-family: var(--font-display); font-size: 13px; font-weight: 600; letter-spacing: 2px; padding: 12px 24px; cursor: pointer; border: none; transition: all .2s; display: flex; align-items: center; gap: 8px; }
+.btn-next { background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); }
+.btn-next:hover { background: var(--accent-cyan); color: var(--bg-primary); box-shadow: var(--glow-cyan); }
+.btn-back { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
+.btn-back:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
+.btn-analyze { background: linear-gradient(135deg,#00e5ff22,#00ff9d22); border: 1px solid var(--accent-green); color: var(--accent-green); font-size: 14px; padding: 14px 28px; }
+.btn-analyze:hover { background: var(--accent-green); color: var(--bg-primary); box-shadow: var(--glow-green); }
+.hidden { display: none; }
+.results-header { padding: 32px 32px 0; }
+.results-header h3 { font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: 1px; color: var(--text-primary); margin: 8px 0; }
+.results-header p { font-size: 13px; color: var(--text-secondary); font-family: var(--font-mono); }
+.risk-banner { margin: 24px 32px; padding: 28px; border: 1px solid var(--border); display: grid; grid-template-columns: auto 1fr auto; gap: 32px; align-items: center; background: var(--bg-secondary); position: relative; overflow: hidden; }
+.risk-banner::after { content:''; position:absolute; inset:0; opacity:.04; }
+.risk-banner.critical::after{background:var(--accent-red)} .risk-banner.high::after{background:#ff6b35} .risk-banner.medium::after{background:var(--accent-yellow)} .risk-banner.low::after{background:var(--accent-green)}
+.risk-score-block { text-align: center; }
+.risk-score-num { font-family: var(--font-mono); font-size: 56px; font-weight: 400; line-height: 1; }
+.risk-score-num.critical{color:var(--accent-red);text-shadow:0 0 30px rgba(255,61,87,.6)} .risk-score-num.high{color:#ff6b35;text-shadow:0 0 30px rgba(255,107,53,.5)} .risk-score-num.medium{color:var(--accent-yellow);text-shadow:0 0 30px rgba(255,214,0,.4)} .risk-score-num.low{color:var(--accent-green);text-shadow:var(--glow-green)}
+.risk-score-sub { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px; margin-top: 4px; }
+.risk-tier-badge { display: inline-block; font-family: var(--font-display); font-size: 13px; font-weight: 700; letter-spacing: 3px; padding: 4px 12px; margin-bottom: 10px; border: 1px solid; }
+.risk-tier-badge.critical{border-color:var(--accent-red);color:var(--accent-red)} .risk-tier-badge.high{border-color:#ff6b35;color:#ff6b35} .risk-tier-badge.medium{border-color:var(--accent-yellow);color:var(--accent-yellow)} .risk-tier-badge.low{border-color:var(--accent-green);color:var(--accent-green)}
+.risk-desc-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.risk-conf { text-align: center; display: flex; flex-direction: column; gap: 4px; }
+.risk-conf-val { font-family: var(--font-mono); font-size: 28px; color: var(--accent-cyan); }
+.risk-conf-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1px; }
+.metrics-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); margin: 0 32px 24px; }
+.metric-box { background: var(--bg-secondary); padding: 20px; }
+.metric-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 1.5px; margin-bottom: 8px; text-transform: uppercase; }
+.metric-val { font-family: var(--font-display); font-size: 18px; font-weight: 600; color: var(--text-primary); }
+.results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); margin: 0 32px 24px; }
+.result-card { background: var(--bg-secondary); padding: 24px; }
+.result-card-title { font-family: var(--font-mono); font-size: 10px; color: var(--accent-cyan); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+.dim-bar { margin-bottom: 14px; }
+.dim-bar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.dim-bar-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); letter-spacing: .5px; }
+.dim-bar-val { font-family: var(--font-mono); font-size: 11px; color: var(--accent-cyan); }
+.dim-bar-track { height: 3px; background: var(--border); position: relative; overflow: hidden; }
+.dim-bar-fill { height: 100%; background: linear-gradient(90deg,var(--accent-cyan),var(--accent-green)); transition: width .8s ease; box-shadow: var(--glow-cyan); }
+.dim-bar-fill.high-risk { background: linear-gradient(90deg,var(--accent-yellow),var(--accent-red)); }
+.chart-wrap { position: relative; height: 220px; display: flex; align-items: center; justify-content: center; }
+.roi-card { margin: 0 32px 32px; border: 1px solid var(--border); background: var(--bg-secondary); }
+.roi-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.roi-icon { font-size: 18px; color: var(--accent-cyan); }
+.roi-header h4 { font-family: var(--font-display); font-size: 15px; font-weight: 600; letter-spacing: 1px; color: var(--text-primary); }
+.roi-body { padding: 24px; display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: start; }
+.roi-verdict { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 120px; padding: 16px; border: 1px solid; }
+.roi-verdict.recommended{border-color:var(--accent-green)} .roi-verdict.consider{border-color:var(--accent-yellow)} .roi-verdict.lower{border-color:var(--text-dim)}
+.roi-verdict-icon { font-size: 24px; }
+.roi-verdict.recommended .roi-verdict-icon{color:var(--accent-green)} .roi-verdict.consider .roi-verdict-icon{color:var(--accent-yellow)} .roi-verdict.lower .roi-verdict-icon{color:var(--text-dim)}
+.roi-verdict-label { font-family: var(--font-display); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-align: center; }
+.roi-verdict.recommended .roi-verdict-label{color:var(--accent-green)} .roi-verdict.consider .roi-verdict-label{color:var(--accent-yellow)} .roi-verdict.lower .roi-verdict-label{color:var(--text-dim)}
+.roi-rationale { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+.findings-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.finding-item { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; color: var(--text-secondary); font-family: var(--font-mono); }
+.finding-dot { width: 6px; height: 6px; flex-shrink: 0; margin-top: 5px; }
+.finding-dot.warning{background:var(--accent-yellow)} .finding-dot.danger{background:var(--accent-red)} .finding-dot.good{background:var(--accent-green)}
+.ai-card { margin: 0 32px 32px; border: 1px solid var(--border-bright); background: var(--bg-secondary); box-shadow: var(--glow-cyan); position: relative; overflow: hidden; }
+.ai-card::before { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:linear-gradient(90deg,transparent,var(--accent-cyan),transparent); }
+.ai-header { padding: 20px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.ai-header-left { display: flex; align-items: center; gap: 10px; }
+.ai-badge { font-family: var(--font-mono); font-size: 10px; color: var(--accent-cyan); border: 1px solid var(--accent-cyan); padding: 3px 8px; letter-spacing: 1px; }
+.ai-header h4 { font-family: var(--font-display); font-size: 15px; font-weight: 600; letter-spacing: 1px; color: var(--text-primary); }
+.ai-body { padding: 24px; }
+.ai-api-form { display: flex; gap: 10px; margin-bottom: 20px; }
+.api-key-input { flex: 1; background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary); font-family: var(--font-mono); font-size: 12px; padding: 10px 14px; outline: none; letter-spacing: 1px; transition: border-color .2s; }
+.api-key-input:focus { border-color: var(--accent-cyan); }
+.api-key-input::placeholder { color: var(--text-dim); }
+.btn-ai { background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); font-family: var(--font-display); font-size: 12px; font-weight: 600; letter-spacing: 2px; padding: 10px 20px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+.btn-ai:hover { background: var(--accent-cyan); color: var(--bg-primary); box-shadow: var(--glow-cyan); }
+.btn-ai:disabled { opacity: .4; cursor: not-allowed; }
+.ai-output { font-family: var(--font-body); font-size: 13.5px; color: var(--text-secondary); line-height: 1.75; min-height: 60px; }
+.ai-thinking { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono); font-size: 12px; color: var(--accent-cyan); }
+.thinking-dots span { display: inline-block; animation: thinking 1.2s ease-in-out infinite; font-size: 18px; }
+.thinking-dots span:nth-child(2){animation-delay:.2s} .thinking-dots span:nth-child(3){animation-delay:.4s}
+@keyframes thinking { 0%,100%{opacity:.2;transform:translateY(0)} 50%{opacity:1;transform:translateY(-4px)} }
+.restart-btn { display: block; margin: 0 32px 32px; background: transparent; border: 1px solid var(--border); color: var(--text-secondary); font-family: var(--font-display); font-size: 13px; font-weight: 600; letter-spacing: 2px; padding: 12px 24px; cursor: pointer; transition: all .2s; }
+.restart-btn:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+.footer { border-top: 1px solid var(--border); padding: 40px 0; position: relative; z-index: 1; }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.footer-logo { font-family: var(--font-mono); font-size: 13px; color: var(--accent-cyan); display: flex; align-items: center; gap: 8px; letter-spacing: 2px; }
+.footer-note { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); text-align: center; }
+.footer-copy { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+@media(max-width:900px){.hero .container{grid-template-columns:1fr}.hero-terminal{order:0}.method-grid{grid-template-columns:repeat(2,1fr)}.results-grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.form-group.span2{grid-column:span 1}.risk-banner{grid-template-columns:1fr;text-align:center}.footer-inner{flex-direction:column;text-align:center}}
+@media(max-width:600px){.method-grid{grid-template-columns:1fr}.progress-steps{gap:4px}.ps-label{display:none}.metrics-row{grid-template-columns:1fr}.roi-body{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
 
@@ -18,11 +204,7 @@
   <nav class="navbar">
     <div class="nav-inner">
       <div class="nav-logo">
-        <div class="logo-icon">
-          <span class="logo-bracket">[</span>
-          <span class="logo-symbol">⬡</span>
-          <span class="logo-bracket">]</span>
-        </div>
+        <div class="logo-icon"><span class="logo-bracket">[</span><span class="logo-symbol">⬡</span><span class="logo-bracket">]</span></div>
         <span class="logo-text">CYBER<span class="logo-accent">RISK</span><span class="logo-ai">_AI</span></span>
       </div>
       <div class="nav-meta">
@@ -38,9 +220,7 @@
     <div class="container">
       <div class="hero-terminal">
         <div class="terminal-bar">
-          <span class="t-dot red"></span>
-          <span class="t-dot yellow"></span>
-          <span class="t-dot green"></span>
+          <span class="t-dot red"></span><span class="t-dot yellow"></span><span class="t-dot green"></span>
           <span class="t-title">threat_assessment.exe</span>
         </div>
         <div class="terminal-body">
@@ -55,25 +235,13 @@
         <h1 class="hero-title">Is your business a <span class="highlight">target?</span></h1>
         <p class="hero-sub">Answer 12 questions. Our AI engine analyses your attack surface, calculates your risk exposure, and tells you whether a vulnerability scanner is worth the investment.</p>
         <div class="hero-stats">
-          <div class="hero-stat">
-            <span class="stat-val">12</span>
-            <span class="stat-label">Risk Vectors</span>
-          </div>
+          <div class="hero-stat"><span class="stat-val">12</span><span class="stat-label">Risk Vectors</span></div>
           <div class="stat-div"></div>
-          <div class="hero-stat">
-            <span class="stat-val">5</span>
-            <span class="stat-label">Dimensions</span>
-          </div>
+          <div class="hero-stat"><span class="stat-val">5</span><span class="stat-label">Dimensions</span></div>
           <div class="stat-div"></div>
-          <div class="hero-stat">
-            <span class="stat-val">AI</span>
-            <span class="stat-label">Powered</span>
-          </div>
+          <div class="hero-stat"><span class="stat-val">AI</span><span class="stat-label">Powered</span></div>
         </div>
-        <a href="#assessment" class="cta-btn">
-          <span class="cta-text">BEGIN THREAT ASSESSMENT</span>
-          <span class="cta-arrow">▶</span>
-        </a>
+        <a href="#assessment" class="cta-btn"><span class="cta-text">BEGIN THREAT ASSESSMENT</span><span class="cta-arrow">▶</span></a>
       </div>
     </div>
   </section>
@@ -85,30 +253,10 @@
         <h2>Threat Classification Engine</h2>
       </div>
       <div class="method-grid">
-        <div class="method-card">
-          <div class="method-num">01</div>
-          <div class="method-icon">◈</div>
-          <h3>Input Collection</h3>
-          <p>Answer questions across 5 risk dimensions: infrastructure, data sensitivity, compliance posture, incident history, and operational exposure.</p>
-        </div>
-        <div class="method-card">
-          <div class="method-num">02</div>
-          <div class="method-icon">◉</div>
-          <h3>Risk Scoring</h3>
-          <p>A weighted multi-factor algorithm scores each dimension and computes an aggregate risk index from 0–100, analogous to a trained ML classifier.</p>
-        </div>
-        <div class="method-card">
-          <div class="method-num">03</div>
-          <div class="method-icon">◎</div>
-          <h3>AI Analysis</h3>
-          <p>Claude AI generates a bespoke threat narrative, highlights your top vulnerabilities, and produces prioritised remediation steps.</p>
-        </div>
-        <div class="method-card">
-          <div class="method-num">04</div>
-          <div class="method-icon">◆</div>
-          <h3>ROI Verdict</h3>
-          <p>The engine cross-references your risk profile against scanner ROI models to deliver a clear investment recommendation.</p>
-        </div>
+        <div class="method-card"><div class="method-num">01</div><div class="method-icon">◈</div><h3>Input Collection</h3><p>Answer questions across 5 risk dimensions: infrastructure, data sensitivity, compliance posture, incident history, and operational exposure.</p></div>
+        <div class="method-card"><div class="method-num">02</div><div class="method-icon">◉</div><h3>Risk Scoring</h3><p>A weighted multi-factor algorithm scores each dimension and computes an aggregate risk index from 0–100, analogous to a trained ML classifier.</p></div>
+        <div class="method-card"><div class="method-num">03</div><div class="method-icon">◎</div><h3>AI Analysis</h3><p>Claude AI generates a bespoke threat narrative, highlights your top vulnerabilities, and produces prioritised remediation steps.</p></div>
+        <div class="method-card"><div class="method-num">04</div><div class="method-icon">◆</div><h3>ROI Verdict</h3><p>The engine cross-references your risk profile against scanner ROI models to deliver a clear investment recommendation.</p></div>
       </div>
     </div>
   </section>
@@ -120,48 +268,28 @@
         <h2>Threat Surface Analysis</h2>
         <p>Complete all sections for maximum accuracy. Fields marked with <span class="req">*</span> are required.</p>
       </div>
-
       <div class="progress-bar-wrap">
         <div class="progress-steps">
-          <div class="ps active" id="ps1">
-            <div class="ps-num">1</div>
-            <div class="ps-label">Organisation</div>
-          </div>
+          <div class="ps active" id="ps1"><div class="ps-num">1</div><div class="ps-label">Organisation</div></div>
           <div class="ps-line" id="pl1"></div>
-          <div class="ps" id="ps2">
-            <div class="ps-num">2</div>
-            <div class="ps-label">Infrastructure</div>
-          </div>
+          <div class="ps" id="ps2"><div class="ps-num">2</div><div class="ps-label">Infrastructure</div></div>
           <div class="ps-line" id="pl2"></div>
-          <div class="ps" id="ps3">
-            <div class="ps-num">3</div>
-            <div class="ps-label">Security Posture</div>
-          </div>
+          <div class="ps" id="ps3"><div class="ps-num">3</div><div class="ps-label">Security Posture</div></div>
           <div class="ps-line" id="pl3"></div>
-          <div class="ps" id="ps4">
-            <div class="ps-num">4</div>
-            <div class="ps-label">Results</div>
-          </div>
+          <div class="ps" id="ps4"><div class="ps-num">4</div><div class="ps-label">Results</div></div>
         </div>
       </div>
 
       <div class="form-panel" id="step1">
-        <div class="panel-header">
-          <span class="panel-tag">SECTION 01</span>
-          <h3>Organisation Profile</h3>
-        </div>
+        <div class="panel-header"><span class="panel-tag">SECTION 01</span><h3>Organisation Profile</h3></div>
         <div class="form-grid">
           <div class="form-group span2">
             <label>Industry sector <span class="req">*</span></label>
             <div class="chip-grid" id="q-industry" data-mode="single">
-              <div class="chip" data-v="3">Finance / Banking</div>
-              <div class="chip" data-v="3">Healthcare</div>
-              <div class="chip" data-v="2">Legal / Professional</div>
-              <div class="chip" data-v="2">Retail / E-commerce</div>
-              <div class="chip" data-v="2">Education</div>
-              <div class="chip" data-v="1">Manufacturing</div>
-              <div class="chip" data-v="1">Hospitality</div>
-              <div class="chip" data-v="1">Other</div>
+              <div class="chip" data-v="3">Finance / Banking</div><div class="chip" data-v="3">Healthcare</div>
+              <div class="chip" data-v="2">Legal / Professional</div><div class="chip" data-v="2">Retail / E-commerce</div>
+              <div class="chip" data-v="2">Education</div><div class="chip" data-v="1">Manufacturing</div>
+              <div class="chip" data-v="1">Hospitality</div><div class="chip" data-v="1">Other</div>
             </div>
           </div>
           <div class="form-group">
@@ -174,49 +302,36 @@
           <div class="form-group">
             <label>Annual revenue (USD)</label>
             <div class="chip-grid" id="q-revenue" data-mode="single">
-              <div class="chip" data-v="1">&lt; $500K</div>
-              <div class="chip" data-v="2">$500K – $2M</div>
-              <div class="chip" data-v="2">$2M – $10M</div>
-              <div class="chip" data-v="3">&gt; $10M</div>
+              <div class="chip" data-v="1">&lt; $500K</div><div class="chip" data-v="2">$500K – $2M</div>
+              <div class="chip" data-v="2">$2M – $10M</div><div class="chip" data-v="3">&gt; $10M</div>
             </div>
           </div>
           <div class="form-group span2">
             <label>Data types handled <span class="req">*</span></label>
             <div class="chip-grid" id="q-data" data-mode="multi">
-              <div class="chip" data-v="3">Customer PII</div>
-              <div class="chip" data-v="3">Payment / Financial</div>
-              <div class="chip" data-v="3">Health Records</div>
-              <div class="chip" data-v="2">Intellectual Property</div>
-              <div class="chip" data-v="2">Employee Records</div>
-              <div class="chip" data-v="1">Operational Data</div>
+              <div class="chip" data-v="3">Customer PII</div><div class="chip" data-v="3">Payment / Financial</div>
+              <div class="chip" data-v="3">Health Records</div><div class="chip" data-v="2">Intellectual Property</div>
+              <div class="chip" data-v="2">Employee Records</div><div class="chip" data-v="1">Operational Data</div>
             </div>
           </div>
         </div>
-        <div class="panel-footer">
-          <button class="btn-next" onclick="goStep(2)">NEXT: INFRASTRUCTURE <span>▶</span></button>
-        </div>
+        <div class="panel-footer"><button class="btn-next" onclick="goStep(2)">NEXT: INFRASTRUCTURE <span>▶</span></button></div>
       </div>
 
       <div class="form-panel hidden" id="step2">
-        <div class="panel-header">
-          <span class="panel-tag">SECTION 02</span>
-          <h3>Infrastructure & Exposure</h3>
-        </div>
+        <div class="panel-header"><span class="panel-tag">SECTION 02</span><h3>Infrastructure &amp; Exposure</h3></div>
         <div class="form-grid">
           <div class="form-group span2">
             <label>Cloud services in use <span class="req">*</span></label>
             <div class="chip-grid" id="q-cloud" data-mode="multi">
-              <div class="chip" data-v="2">AWS</div>
-              <div class="chip" data-v="2">Azure</div>
-              <div class="chip" data-v="2">Google Cloud</div>
-              <div class="chip" data-v="1">Microsoft 365</div>
-              <div class="chip" data-v="1">Google Workspace</div>
-              <div class="chip" data-v="2">Custom / Private Cloud</div>
+              <div class="chip" data-v="2">AWS</div><div class="chip" data-v="2">Azure</div>
+              <div class="chip" data-v="2">Google Cloud</div><div class="chip" data-v="1">Microsoft 365</div>
+              <div class="chip" data-v="1">Google Workspace</div><div class="chip" data-v="2">Custom / Private Cloud</div>
               <div class="chip" data-v="0">No Cloud Services</div>
             </div>
           </div>
           <div class="form-group">
-            <label>Number of internet-facing assets</label>
+            <label>Internet-facing assets</label>
             <div class="slider-wrap">
               <input type="range" id="q-assets" min="0" max="50" value="5" />
               <div class="slider-val"><span id="assets-display">5</span> assets</div>
@@ -225,18 +340,14 @@
           <div class="form-group">
             <label>Remote work policy <span class="req">*</span></label>
             <div class="chip-grid" id="q-remote" data-mode="single">
-              <div class="chip" data-v="1">On-site only</div>
-              <div class="chip" data-v="2">Hybrid</div>
-              <div class="chip" data-v="3">Fully remote</div>
+              <div class="chip" data-v="1">On-site only</div><div class="chip" data-v="2">Hybrid</div><div class="chip" data-v="3">Fully remote</div>
             </div>
           </div>
           <div class="form-group span2">
             <label>Third-party integrations / vendors</label>
             <div class="chip-grid" id="q-vendors" data-mode="single">
-              <div class="chip" data-v="0">None</div>
-              <div class="chip" data-v="1">1 – 3</div>
-              <div class="chip" data-v="2">4 – 10</div>
-              <div class="chip" data-v="3">10+</div>
+              <div class="chip" data-v="0">None</div><div class="chip" data-v="1">1 – 3</div>
+              <div class="chip" data-v="2">4 – 10</div><div class="chip" data-v="3">10+</div>
             </div>
           </div>
         </div>
@@ -247,91 +358,129 @@
       </div>
 
       <div class="form-panel hidden" id="step3">
-        <div class="panel-header">
-          <span class="panel-tag">SECTION 03</span>
-          <h3>Security Posture & History</h3>
-        </div>
+        <div class="panel-header"><span class="panel-tag">SECTION 03</span><h3>Security Posture &amp; History</h3></div>
         <div class="form-grid">
           <div class="form-group span2">
             <label>Security controls in place <span class="req">*</span></label>
             <div class="chip-grid" id="q-controls" data-mode="multi">
-              <div class="chip" data-v="-2">Firewall / IDS</div>
-              <div class="chip" data-v="-2">Multi-Factor Authentication</div>
-              <div class="chip" data-v="-2">Endpoint Protection</div>
-              <div class="chip" data-v="-1">Security Awareness Training</div>
-              <div class="chip" data-v="-1">Data Encryption</div>
-              <div class="chip" data-v="-2">Regular Backups</div>
+              <div class="chip" data-v="-2">Firewall / IDS</div><div class="chip" data-v="-2">Multi-Factor Authentication</div>
+              <div class="chip" data-v="-2">Endpoint Protection</div><div class="chip" data-v="-1">Security Awareness Training</div>
+              <div class="chip" data-v="-1">Data Encryption</div><div class="chip" data-v="-2">Regular Backups</div>
               <div class="chip" data-v="-1">Patch Management</div>
             </div>
           </div>
           <div class="form-group">
             <label>Last vulnerability scan / pentest <span class="req">*</span></label>
             <div class="chip-grid" id="q-scan" data-mode="single">
-              <div class="chip" data-v="0">Within 3 months</div>
-              <div class="chip" data-v="1">3 – 12 months ago</div>
-              <div class="chip" data-v="2">Over a year ago</div>
-              <div class="chip" data-v="3">Never</div>
+              <div class="chip" data-v="0">Within 3 months</div><div class="chip" data-v="1">3 – 12 months ago</div>
+              <div class="chip" data-v="2">Over a year ago</div><div class="chip" data-v="3">Never</div>
             </div>
           </div>
           <div class="form-group">
             <label>Compliance requirements</label>
             <div class="chip-grid" id="q-compliance" data-mode="multi">
-              <div class="chip" data-v="2">GDPR</div>
-              <div class="chip" data-v="2">PCI-DSS</div>
-              <div class="chip" data-v="2">HIPAA</div>
-              <div class="chip" data-v="1">ISO 27001</div>
-              <div class="chip" data-v="1">SOC 2</div>
-              <div class="chip" data-v="0">None</div>
+              <div class="chip" data-v="2">GDPR</div><div class="chip" data-v="2">PCI-DSS</div>
+              <div class="chip" data-v="2">HIPAA</div><div class="chip" data-v="1">ISO 27001</div>
+              <div class="chip" data-v="1">SOC 2</div><div class="chip" data-v="0">None</div>
             </div>
           </div>
           <div class="form-group">
             <label>Previous security incidents <span class="req">*</span></label>
             <div class="chip-grid" id="q-incidents" data-mode="single">
-              <div class="chip" data-v="0">None</div>
-              <div class="chip" data-v="2">1 – 2 minor</div>
-              <div class="chip" data-v="3">Major breach / ransomware</div>
-              <div class="chip" data-v="1">Unknown / unsure</div>
+              <div class="chip" data-v="0">None</div><div class="chip" data-v="2">1 – 2 minor</div>
+              <div class="chip" data-v="3">Major breach / ransomware</div><div class="chip" data-v="1">Unknown / unsure</div>
             </div>
           </div>
           <div class="form-group span2">
             <label>Dedicated IT / security staff</label>
             <div class="chip-grid" id="q-staff" data-mode="single">
-              <div class="chip" data-v="3">None — no IT staff</div>
-              <div class="chip" data-v="2">General IT only</div>
-              <div class="chip" data-v="1">IT with some security knowledge</div>
-              <div class="chip" data-v="0">Dedicated security team</div>
+              <div class="chip" data-v="3">None — no IT staff</div><div class="chip" data-v="2">General IT only</div>
+              <div class="chip" data-v="1">IT with some security knowledge</div><div class="chip" data-v="0">Dedicated security team</div>
             </div>
           </div>
         </div>
         <div class="panel-footer">
           <button class="btn-back" onclick="goStep(2)">◀ BACK</button>
-          <button class="btn-analyze" onclick="runAnalysis()">
-            <span class="btn-analyze-text">RUN THREAT ANALYSIS</span>
-            <span class="btn-analyze-icon">⬡</span>
-          </button>
+          <button class="btn-analyze" onclick="runAnalysis()"><span class="btn-analyze-text">RUN THREAT ANALYSIS</span><span class="btn-analyze-icon">⬡</span></button>
         </div>
       </div>
 
       <div class="form-panel hidden" id="step4">
         <div id="results-container"></div>
       </div>
-
     </div>
   </section>
 
   <footer class="footer">
     <div class="container">
       <div class="footer-inner">
-        <div class="footer-logo">
-          <span class="logo-bracket">[</span><span class="logo-symbol">⬡</span><span class="logo-bracket">]</span>
-          <span>CYBERRISK_AI</span>
-        </div>
+        <div class="footer-logo"><span class="logo-bracket">[</span><span class="logo-symbol">⬡</span><span class="logo-bracket">]</span><span>CYBERRISK_AI</span></div>
         <p class="footer-note">Proof-of-concept for academic research. Not a substitute for professional cybersecurity assessment.</p>
         <p class="footer-copy">© 2026 CyberRisk AI</p>
       </div>
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script>
+document.addEventListener('DOMContentLoaded',()=>{generateParticles();initSliders();initChips();});
+function generateParticles(){const c=document.getElementById('particles');for(let i=0;i<30;i++){const p=document.createElement('div');p.className='particle';p.style.left=Math.random()*100+'%';p.style.animationDuration=(8+Math.random()*12)+'s';p.style.animationDelay=(Math.random()*10)+'s';p.style.width=p.style.height=(1+Math.random()*2)+'px';c.appendChild(p);}}
+function initSliders(){document.getElementById('q-emp').addEventListener('input',function(){document.getElementById('emp-display').textContent=this.value;});document.getElementById('q-assets').addEventListener('input',function(){document.getElementById('assets-display').textContent=this.value;});}
+function initChips(){document.querySelectorAll('.chip-grid').forEach(grid=>{const mode=grid.dataset.mode;grid.querySelectorAll('.chip').forEach(chip=>{chip.addEventListener('click',()=>{if(mode==='single'){grid.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));chip.classList.add('selected');}else{chip.classList.toggle('selected');}});});});}
+function goStep(n){[1,2,3,4].forEach(i=>{const panel=document.getElementById('step'+i);const ps=document.getElementById('ps'+i);panel.classList.toggle('hidden',i!==n);ps.classList.remove('active','done');if(i===n)ps.classList.add('active');if(i<n){ps.classList.add('done');ps.querySelector('.ps-num').textContent='✓';}else{ps.querySelector('.ps-num').textContent=i;}if(i<4){const pl=document.getElementById('pl'+i);if(pl)pl.classList.toggle('done',i<n);}});window.scrollTo({top:document.getElementById('assessment').offsetTop-80,behavior:'smooth'});}
+function readSingle(id){const sel=document.querySelector('#'+id+' .chip.selected');return sel?Number(sel.dataset.v):null;}
+function readMulti(id){return[...document.querySelectorAll('#'+id+' .chip.selected')].map(c=>Number(c.dataset.v));}
+function readSingleText(id){const sel=document.querySelector('#'+id+' .chip.selected');return sel?sel.textContent.trim():'Not specified';}
+function readMultiText(id){return[...document.querySelectorAll('#'+id+' .chip.selected')].map(c=>c.textContent.trim());}
+function runAnalysis(){
+  const industry=readSingle('q-industry'),empCount=parseInt(document.getElementById('q-emp').value),revenue=readSingle('q-revenue'),dataTypes=readMulti('q-data'),cloud=readMulti('q-cloud'),assets=parseInt(document.getElementById('q-assets').value),remote=readSingle('q-remote'),vendors=readSingle('q-vendors'),controls=readMulti('q-controls'),scanHistory=readSingle('q-scan'),compliance=readMulti('q-compliance'),incidents=readSingle('q-incidents'),staff=readSingle('q-staff');
+  const answered=[industry,revenue,remote,vendors,scanHistory,incidents,staff].filter(v=>v!==null).length;
+  const confidence=Math.round((answered/7)*100);
+  const dimExposure=calcDim([(industry||1)*12,Math.min(assets*3,30),(remote||1)*10,(vendors||0)*8],100);
+  const dimData=calcDim([dataTypes.reduce((a,b)=>a+b,0)*6,compliance.reduce((a,b)=>a+b,0)*4],100);
+  const dimInfra=calcDim([cloud.reduce((a,b)=>a+b,0)*5,Math.min(empCount/5,20),(revenue||1)*6],100);
+  const controlPenalty=controls.reduce((a,b)=>a+Math.abs(b),0)*3;
+  const dimPosture=Math.max(0,Math.min(100,(scanHistory||2)*18+(staff||2)*12-controlPenalty+20));
+  const dimHistory=Math.min(100,(incidents||0)*22+(scanHistory||2)*8);
+  const score=Math.round(dimExposure*.25+dimData*.20+dimInfra*.20+dimPosture*.20+dimHistory*.15);
+  const clampedScore=Math.min(99,Math.max(1,score));
+  let tier,tierLabel,tierDesc;
+  if(clampedScore>=75){tier='critical';tierLabel='CRITICAL RISK';tierDesc='Your organisation presents a highly attractive attack surface. Immediate remediation is strongly advised.';}
+  else if(clampedScore>=55){tier='high';tierLabel='HIGH RISK';tierDesc='Significant vulnerabilities detected. Your current posture leaves you exposed to targeted attacks.';}
+  else if(clampedScore>=35){tier='medium';tierLabel='MEDIUM RISK';tierDesc='Moderate risk exposure with identifiable gaps. Proactive measures will substantially reduce your attack surface.';}
+  else{tier='low';tierLabel='LOW RISK';tierDesc='Relatively strong security posture detected. Continue to maintain and improve existing controls.';}
+  let roiClass,roiIcon,roiLabel,roiRationale;
+  const forceRecommend=(scanHistory>=2)||(incidents>=2)||(assets>15);
+  if(clampedScore>=55||forceRecommend){roiClass='recommended';roiIcon='▲';roiLabel='RECOMMENDED';roiRationale='Your risk profile strongly justifies the investment. A vulnerability scanner would identify exploitable weaknesses before attackers do, providing clear ROI through breach prevention.';}
+  else if(clampedScore>=35){roiClass='consider';roiIcon='◆';roiLabel='CONSIDER IT';roiRationale='A scanner would provide value, particularly given your internet-facing assets and data handling. Weigh the cost against your current exposure level.';}
+  else{roiClass='lower';roiIcon='▼';roiLabel='LOWER PRIORITY';roiRationale='Your current controls appear adequate for your risk level. Focus on maintaining existing measures before investing in additional tooling.';}
+  const findings=buildFindings({scanHistory,incidents,controls,assets,dataTypes,staff,compliance});
+  const inputSummary=buildInputSummary({industry:readSingleText('q-industry'),employees:empCount,revenue:readSingleText('q-revenue'),dataTypes:readMultiText('q-data'),cloud:readMultiText('q-cloud'),assets,remote:readSingleText('q-remote'),vendors:readSingleText('q-vendors'),controls:readMultiText('q-controls'),scanHistory:readSingleText('q-scan'),compliance:readMultiText('q-compliance'),incidents:readSingleText('q-incidents'),staff:readSingleText('q-staff')});
+  const dims=[{label:'Exposure Surface',value:dimExposure},{label:'Data Sensitivity',value:dimData},{label:'Infrastructure',value:dimInfra},{label:'Security Posture',value:dimPosture},{label:'Incident History',value:dimHistory}];
+  renderResults({score:clampedScore,tier,tierLabel,tierDesc,confidence,dims,roiClass,roiIcon,roiLabel,roiRationale,findings,inputSummary});
+  goStep(4);
+}
+function calcDim(values,max){return Math.min(100,Math.round((values.reduce((a,b)=>a+b,0)/max)*100));}
+function buildFindings({scanHistory,incidents,controls,assets,dataTypes,staff,compliance}){const f=[];if(scanHistory>=2)f.push({type:'danger',text:'Vulnerability scanning is overdue or has never been performed'});if(incidents>=2)f.push({type:'danger',text:'Previous security incidents increase re-attack probability'});if(assets>15)f.push({type:'warning',text:'High number of internet-facing assets expands attack surface'});if(dataTypes.some(v=>v===3))f.push({type:'warning',text:'Highly sensitive data types handled (PII, financial, health)'});if(staff>=2)f.push({type:'warning',text:'Limited dedicated security expertise increases response risk'});if(compliance.some(v=>v>=2))f.push({type:'warning',text:'Regulatory compliance requirements add breach consequence severity'});if(controls.some(v=>v<=-2))f.push({type:'good',text:'Core security controls detected — effective if properly maintained'});return f;}
+function buildInputSummary(i){return`Industry: ${i.industry}\nEmployees: ${i.employees}\nRevenue: ${i.revenue}\nData types: ${i.dataTypes.join(', ')||'None selected'}\nCloud services: ${i.cloud.join(', ')||'None'}\nInternet-facing assets: ${i.assets}\nRemote work: ${i.remote}\nVendors: ${i.vendors}\nSecurity controls: ${i.controls.join(', ')||'None selected'}\nLast scan: ${i.scanHistory}\nCompliance: ${i.compliance.join(', ')||'None'}\nIncidents: ${i.incidents}\nIT/security staff: ${i.staff}`.trim();}
+function renderResults({score,tier,tierLabel,tierDesc,confidence,dims,roiClass,roiIcon,roiLabel,roiRationale,findings,inputSummary}){
+  const dimBarsHTML=dims.map(d=>`<div class="dim-bar"><div class="dim-bar-header"><span class="dim-bar-label">${d.label}</span><span class="dim-bar-val">${d.value}</span></div><div class="dim-bar-track"><div class="dim-bar-fill ${d.value>=60?'high-risk':''}" style="width:${d.value}%"></div></div></div>`).join('');
+  const findingsHTML=findings.map(f=>`<div class="finding-item"><div class="finding-dot ${f.type}"></div><span>${f.text}</span></div>`).join('');
+  const tierColor=tier==='critical'?'var(--accent-red)':tier==='high'?'#ff6b35':tier==='medium'?'var(--accent-yellow)':'var(--accent-green)';
+  const metricsHTML=`<div class="metrics-row"><div class="metric-box"><div class="metric-label">RISK TIER</div><div class="metric-val" style="color:${tierColor}">${tierLabel}</div></div><div class="metric-box"><div class="metric-label">TOP DIMENSION</div><div class="metric-val">${dims.reduce((a,b)=>a.value>b.value?a:b).label}</div></div><div class="metric-box"><div class="metric-label">SCANNER ROI</div><div class="metric-val">${roiLabel}</div></div></div>`;
+  const enc=encodeURIComponent(inputSummary);
+  document.getElementById('results-container').innerHTML=`
+    <div class="results-header"><div class="section-label">// ANALYSIS COMPLETE</div><h3>Threat Surface Assessment Results</h3><p>Based on ${confidence}% of recommended inputs — add more detail to increase confidence.</p></div>
+    <div class="risk-banner ${tier}"><div class="risk-score-block"><div class="risk-score-num ${tier}">${score}</div><div class="risk-score-sub">/ 100 risk index</div></div><div class="risk-info-block"><div class="risk-tier-badge ${tier}">${tierLabel}</div><p class="risk-desc-text">${tierDesc}</p></div><div class="risk-conf"><span class="risk-conf-val">${confidence}%</span><span class="risk-conf-label">INPUT CONFIDENCE</span></div></div>
+    ${metricsHTML}
+    <div class="results-grid"><div class="result-card"><div class="result-card-title">// RISK DIMENSION BREAKDOWN</div>${dimBarsHTML}</div><div class="result-card"><div class="result-card-title">// THREAT RADAR</div><div class="chart-wrap"><canvas id="radar-chart"></canvas></div></div></div>
+    <div class="roi-card"><div class="roi-header"><span class="roi-icon">◈</span><h4>VULNERABILITY SCANNER ROI VERDICT</h4></div><div class="roi-body"><div class="roi-verdict ${roiClass}"><span class="roi-verdict-icon">${roiIcon}</span><span class="roi-verdict-label">${roiLabel}</span></div><div><p class="roi-rationale">${roiRationale}</p><div class="findings-list">${findingsHTML}</div></div></div></div>
+    <div class="ai-card"><div class="ai-header"><div class="ai-header-left"><span class="ai-badge">AI</span><h4>CLAUDE AI — THREAT INTELLIGENCE REPORT</h4></div></div><div class="ai-body"><div class="ai-api-form"><input type="password" class="api-key-input" id="api-key-input" placeholder="Enter your Anthropic API key to unlock AI analysis..." /><button class="btn-ai" id="btn-generate-ai" onclick="generateAIAnalysis('${enc}',${score},'${tier}','${roiLabel}')">ANALYSE</button></div><div class="ai-output" id="ai-output"><span style="font-family:var(--font-mono);font-size:12px;color:var(--text-dim);">// Enter your API key above to generate a personalised AI threat intelligence report</span></div></div></div>
+    <button class="restart-btn" onclick="restartAssessment()">◀ RUN NEW ASSESSMENT</button>`;
+  setTimeout(()=>renderRadar(dims),100);
+}
+function renderRadar(dims){const canvas=document.getElementById('radar-chart');if(!canvas)return;new Chart(canvas.getContext('2d'),{type:'radar',data:{labels:dims.map(d=>d.label),datasets:[{label:'Risk Score',data:dims.map(d=>d.value),backgroundColor:'rgba(0,229,255,0.1)',borderColor:'rgba(0,229,255,0.8)',borderWidth:1.5,pointBackgroundColor:'#00e5ff',pointBorderColor:'#00e5ff',pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:'rgba(0,229,255,0.1)'},angleLines:{color:'rgba(0,229,255,0.1)'},pointLabels:{font:{family:'Share Tech Mono',size:10},color:'rgba(122,172,204,0.9)'}}},plugins:{legend:{display:false}}}});}
+async function generateAIAnalysis(enc,score,tier,roiLabel){const apiKey=document.getElementById('api-key-input').value.trim();if(!apiKey){document.getElementById('ai-output').innerHTML='<span style="color:var(--accent-red);font-family:var(--font-mono);font-size:12px;">// ERROR: API key required</span>';return;}const inputSummary=decodeURIComponent(enc);const btn=document.getElementById('btn-generate-ai');btn.disabled=true;document.getElementById('ai-output').innerHTML='<div class="ai-thinking"><span>ANALYSING THREAT VECTORS</span><div class="thinking-dots"><span>.</span><span>.</span><span>.</span></div></div>';const prompt=`You are a senior cybersecurity analyst. A small-to-medium business has completed a cyber risk assessment.\n\nAssessment inputs:\n${inputSummary}\n\nRisk score: ${score}/100 (${tier} risk)\nScanner ROI verdict: ${roiLabel}\n\nWrite a professional threat intelligence report in 3 paragraphs:\n1. Overview of the organisation's threat profile and key risk drivers\n2. The top 3 specific vulnerabilities or exposures identified from their inputs, with brief explanation of each\n3. Prioritised recommendations and a clear justification for the vulnerability scanner investment verdict\n\nBe specific, technical, and direct. Reference actual details from their inputs. Do not use bullet points — write in flowing paragraphs.`;try{const response=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});const data=await response.json();if(data.error){document.getElementById('ai-output').innerHTML=`<span style="color:var(--accent-red);font-family:var(--font-mono);font-size:12px;">// ERROR: ${data.error.message}</span>`;}else{const text=data.content[0].text;document.getElementById('ai-output').innerHTML=text.split('\n\n').map(p=>`<p style="margin-bottom:14px;">${p}</p>`).join('');}}catch(err){document.getElementById('ai-output').innerHTML=`<span style="color:var(--accent-red);font-family:var(--font-mono);font-size:12px;">// ERROR: ${err.message}</span>`;}btn.disabled=false;}
+function restartAssessment(){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));document.getElementById('q-emp').value=25;document.getElementById('emp-display').textContent=25;document.getElementById('q-assets').value=5;document.getElementById('assets-display').textContent=5;document.getElementById('results-container').innerHTML='';goStep(1);}
+  </script>
 </body>
 </html>
