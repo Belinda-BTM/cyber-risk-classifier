@@ -101,8 +101,15 @@ def calculate_risk_score(answers):
         level = "High"
 
     return {"score": score, "max_score": max_score, "level": level}
-
 def generate_threat_report(answers, risk_level):
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    
+    if not api_key:
+        return ("AI threat report unavailable. To enable this feature, "
+                "set your ANTHROPIC_API_KEY environment variable. "
+                "You can obtain a free API key from console.anthropic.com. "
+                "The risk score and assessment above are fully functional without the API key.")
+
     prompt = f"""You are a cybersecurity expert advising a small or medium enterprise (SME).
 Based on the following assessment answers, generate a professional threat report with specific recommendations.
 Use plain text only. Do not use markdown, hashtags, emojis, bullet points, tables, or any special formatting.
