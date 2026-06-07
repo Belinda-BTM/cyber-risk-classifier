@@ -1,12 +1,64 @@
 from flask import Flask, render_template, request, jsonify
 import anthropic
 import os
+import sqlite3
+from datetime import datetime
 
 app = Flask(__name__)
 
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
-# Risk scoring engine
+def init_db():
+    conn = sqlite3.connect('assessments.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS assessments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT,
+            firewall TEXT,
+            antivirus TEXT,
+            updates TEXT,
+            training TEXT,
+            backups TEXT,
+            passwords TEXT,
+            score INTEGER,
+            risk_level TEXT,
+            report TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def save_assessment(answers, score, risk_level, report):
+    conn = sqlite3.connect('assessments.db')
+    c = conn.cursor()
+    c.execute('''
+        INSERT INTO assessments 
+        (timestamp, firewall, antivirus, updates, training, backups, passwords, score, risk_level, report)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        datetime.now().strftime("%Y-%m-%d %H:%M"),
+        answers.get('firewall'),
+        answers.get('antivirus'),
+        answers.get('updates'),
+        answers.get('training'),
+        answers.get('backups'),
+        answers.get('passwords'),
+        score,
+        risk_level,
+        report
+    ))
+    conn.commit()
+    conn.close()
+
+def get_all_assessments():
+    conn = sqlite3.connect('assessments.db')
+    c = conn.cursor()
+    c.execute('SELECT id, timestamp, score, risk_level FROM assessments ORDER BY timestamp DESC')
+    rows = c.fetchall()
+    conn.close()
+    return rows
+
 def calculate_risk_score(answers):
     score = 0
     max_score = 100
@@ -50,7 +102,6 @@ def calculate_risk_score(answers):
 
     return {"score": score, "max_score": max_score, "level": level}
 
-
 def generate_threat_report(answers, risk_level):
     prompt = f"""You are a cybersecurity expert advising a small or medium enterprise (SME).
 Based on the following assessment answers, generate a professional threat report with specific recommendations.
@@ -73,14 +124,16 @@ Provide specific, actionable recommendations based on the weak areas identified.
         max_tokens=300,
         messages=[{"role": "user", "content": prompt}]
     )
-
     return message.content[0].text
-
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/history')
+def history():
+    assessments = get_all_assessments()
+    return render_template('history.html', assessments=assessments)
 
 @app.route('/assess', methods=['POST'])
 def assess():
@@ -88,8 +141,9 @@ def assess():
     result = calculate_risk_score(answers)
     report = generate_threat_report(answers, result['level'])
     result['report'] = report
+    save_assessment(answers, result['score'], result['level'], report)
     return jsonify(result)
 
-
 if __name__ == '__main__':
+    init_db()
     app.run(debug=True)

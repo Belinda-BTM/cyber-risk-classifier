@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment History</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #00ff41;
+            font-size: 0.9em;
+        }
+        th {
+            color: #ffffff;
+            background-color: #1a1a1a;
+        }
+        td {
+            color: #00ff41;
+        }
+        .low { color: #00ff41; }
+        .medium { color: #ffaa00; }
+        .high { color: #ff3333; }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #00ff41;
+            text-decoration: none;
+            border: 1px solid #00ff41;
+            padding: 8px 16px;
+            border-radius: 4px;
+        }
+        .back-btn:hover {
+            background-color: #00ff41;
+            color: #0a0a0a;
+        }
+        .no-data {
+            text-align: center;
+            color: #aaa;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Assessment History</h1>
+        <p class="subtitle">Track your organisation's cybersecurity progress over time.</p>
+        <a href="/" class="back-btn">Back to Assessment</a>
+
+        {% if assessments %}
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Date & Time</th>
+                <th>Score</th>
+                <th>Risk Level</th>
+            </tr>
+            {% for a in assessments %}
+            <tr>
+                <td>{{ a[0] }}</td>
+                <td>{{ a[1] }}</td>
+                <td>{{ a[2] }} / 100</td>
+                <td class="{{ a[3].lower() }}">{{ a[3] }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p class="no-data">No assessments yet. Run your first assessment to start tracking progress.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
