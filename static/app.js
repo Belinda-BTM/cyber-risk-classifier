@@ -28,7 +28,7 @@ async function submitAssessment() {
 }
 
 function getRiskMessage(level) {
-    if (level === 'Low') return '✅ Your organisation has good cyber hygiene. Keep it up!';
-    if (level === 'Medium') return '⚠️ Some vulnerabilities detected. Review your security policies.';
-    if (level === 'High') return '🚨 High risk detected! Immediate action recommended.';
+    if (level === 'Low') return 'Your organisation has good cyber hygiene. Keep it up!';
+    if (level === 'Medium') return 'Some vulnerabilities detected. Review your security policies.';
+    if (level === 'High') return 'High risk detected! Immediate action recommended.';
 }
