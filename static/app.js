@@ -8,6 +8,10 @@ async function submitAssessment() {
         passwords: document.getElementById('passwords').value
     };
 
+    const resultDiv = document.getElementById('result');
+    resultDiv.classList.remove('hidden', 'low', 'medium', 'high');
+    resultDiv.innerHTML = '<p>Generating your threat report...</p>';
+
     const response = await fetch('/assess', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -16,14 +20,15 @@ async function submitAssessment() {
 
     const result = await response.json();
 
-    const resultDiv = document.getElementById('result');
-    resultDiv.classList.remove('hidden', 'low', 'medium', 'high');
     resultDiv.classList.add(result.level.toLowerCase());
 
     resultDiv.innerHTML = `
         <h2>Risk Level: ${result.level}</h2>
         <p>Score: ${result.score} / ${result.max_score}</p>
         <p>${getRiskMessage(result.level)}</p>
+        <hr style="border-color: currentColor; margin: 15px 0;">
+        <h3>AI Threat Report</h3>
+        <p style="text-align: left; line-height: 1.6;">${result.report}</p>
     `;
 }
 
