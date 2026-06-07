@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Risk Classifier</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Cyber Risk Classifier</h1>
+        <p class="subtitle">Answer the questions below to assess your organisation's cyber risk level.</p>
+
+        <div class="question">
+            <label>1. Does your organisation have a firewall?</label>
+            <select id="firewall">
+                <option value="yes">Yes, fully implemented</option>
+                <option value="partial">Partially implemented</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+
+        <div class="question">
+            <label>2. Is antivirus software installed on all devices?</label>
+            <select id="antivirus">
+                <option value="yes">Yes, on all devices</option>
+                <option value="partial">Only on some devices</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+
+        <div class="question">
+            <label>3. How often is software updated?</label>
+            <select id="updates">
+                <option value="always">Always kept up to date</option>
+                <option value="sometimes">Sometimes updated</option>
+                <option value="no">Rarely or never</option>
+            </select>
+        </div>
+
+        <div class="question">
+            <label>4. Do employees receive cybersecurity training?</label>
+            <select id="training">
+                <option value="yes">Yes, regularly</option>
+                <option value="some">Some employees only</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+
+        <div class="question">
+            <label>5. Are data backups performed regularly?</label>
+            <select id="backups">
+                <option value="yes">Yes, regularly</option>
+                <option value="sometimes">Sometimes</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+
+        <div class="question">
+            <label>6. Does your organisation have a strong password policy?</label>
+            <select id="passwords">
+                <option value="yes">Yes, enforced</option>
+                <option value="partial">Partial policy</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+
+        <button onclick="submitAssessment()">Assess My Risk</button>
+
+        <div id="result" class="result hidden"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
